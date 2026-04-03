@@ -2,6 +2,13 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCreditosPorCliente, addCredito, clearCreditos } from '../store/slices/creditosSlice';
 
+// Función para formatear fechas
+const formatearFecha = (fechaString) => {
+  if (!fechaString) return '';
+  const fecha = new Date(fechaString + 'T00:00:00'); // Agregar hora para evitar problemas de zona horaria
+  return fecha.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
 export default function Creditos() {
   const dispatch = useDispatch();
   const { lista, loading, error } = useSelector((state) => state.creditos);
@@ -70,7 +77,7 @@ export default function Creditos() {
                   {cr.cuotas.map(c => (
                     <tr key={c.idCuota}>
                       <td>{c.idCuota}</td>
-                      <td>{c.fechaVencimiento}</td>
+                      <td>{formatearFecha(c.fechaVencimiento)}</td>
                       <td style={{ color: c.pagada ? '#2e7d32' : '#c62828' }}>{c.pagada ? '✔ Pagada' : '✘ Pendiente'}</td>
                     </tr>
                   ))}

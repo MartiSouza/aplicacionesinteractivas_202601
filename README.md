@@ -27,10 +27,10 @@ tpejemplo/
 ├── backend/               → Proyecto Spring Boot (Maven)
 │   └── src/main/java/com/uade/tpejemplo/
 │       ├── config/        → SecurityConfig (JWT + stateless)
-│       ├── controller/    → AuthController, ClienteController, CreditoController, CobranzaController
+│       ├── controller/    → AuthController, ClienteController, CreditoController, CobranzaController, DashboardController
 │       ├── dto/
 │       │   ├── request/   → ClienteRequest, CreditoRequest, CobranzaRequest, LoginRequest, RegisterRequest
-│       │   └── response/  → ClienteResponse, CreditoResponse, CuotaResponse, CobranzaResponse, AuthResponse
+│       │   └── response/  → ClienteResponse, CreditoResponse, CuotaResponse, CobranzaResponse, AuthResponse, DashboardResumenResponse, CreditosPorEstadoResponse
 │       ├── exception/     → ResourceNotFoundException, BusinessException, GlobalExceptionHandler
 │       ├── model/         → Cliente, Credito, Cuota, CuotaId, Cobranza, Usuario, Rol
 │       ├── repository/    → ClienteRepository, CreditoRepository, CuotaRepository, CobranzaRepository, UsuarioRepository
@@ -38,7 +38,8 @@ tpejemplo/
 │       └── service/
 │           ├── ClienteService / ClienteServiceImpl
 │           ├── CreditoService / CreditoServiceImpl
-│           └── CobranzaService / CobranzaServiceImpl
+│           ├── CobranzaService / CobranzaServiceImpl
+│           └── DashboardService / DashboardServiceImpl
 └── frontend/              → Proyecto React + Vite
     └── src/
         ├── api/           → apiClient.js, auth.js, clientes.js, creditos.js, cobranzas.js
@@ -126,6 +127,209 @@ tpejemplo/
 |--------|----------|-------------|
 | POST | `/api/cobranzas` | Registrar pago de una cuota |
 | GET | `/api/cobranzas/credito/{idCredito}` | Cobranzas de un crédito |
+
+### Dashboard (requiere JWT)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/api/dashboard/resumen` | Devuelve métricas agregadas del sistema |
+
+---
+
+## Módulo 5: Dashboard de estadísticas
+
+### Descripción del módulo
+
+Para la Entrega 1 del módulo 5 se implementó un dashboard de estadísticas orientado a exponer un resumen general del estado de los créditos y cobranzas del sistema.
+
+La resolución se apoyó en el modelo real ya existente, sin crear una entidad nueva ni persistir información específica del dashboard.
+
+Según la aclaración realizada por el profesor para este módulo, la Entrega 1 del Dashboard se resuelve sin CRUD propio del dashboard y únicamente con backend orientado a consultas y métricas.
+
+### Objetivo funcional
+
+El objetivo del módulo es permitir la consulta de métricas agregadas del negocio mediante un endpoint protegido con JWT.
+
+El resumen expone:
+
+- total de créditos
+- monto total prestado
+- monto total cobrado
+- porcentaje de recupero
+- cantidad de créditos activos
+- cantidad de créditos en mora
+- créditos por estado
+
+### Modelo de datos utilizado
+
+El dashboard se calcula a partir de estas entidades del proyecto:
+
+- Cliente
+- Credito
+- Cuota
+- Cobranza
+
+Relaciones utilizadas:
+
+- Cliente 1 --- N Credito
+- Credito 1 --- N Cuota
+- Cobranza N --- 1 Cuota
+
+### Decisión de diseño
+
+Se decidió implementar el dashboard como un módulo de métricas calculadas y no como una entidad persistente.
+
+Esta decisión también responde a la indicación específica del profesor para el módulo Dashboard: en esta entrega no correspondía implementar altas, bajas ni modificaciones del dashboard, sino exponer endpoints de consulta sobre métricas del sistema.
+
+Por ese motivo:
+
+- no se creó entidad Dashboard
+- no se creó tabla Dashboard
+- no se creó DashboardRepository
+- no se implementó CRUD del dashboard
+
+Los componentes agregados para este módulo fueron:
+
+- DashboardController
+- DashboardService
+- DashboardServiceImpl
+- DashboardResumenResponse
+- CreditosPorEstadoResponse
+
+Los repositories se extendieron de forma mínima en los puntos necesarios:
+
+- CreditoRepository
+- CobranzaRepository
+
+### Criterio de estados
+
+El estado de cada crédito se determina al momento de consultar el resumen:
+
+- FINALIZADO: todas las cuotas pagadas
+- EN_MORA: existe al menos una cuota vencida e impaga
+- ACTIVO: no está finalizado y tampoco tiene cuotas vencidas impagas
+
+### Endpoints implementados y probados
+
+En esta entrega se validaron estos endpoints reales del proyecto:
+
+- POST `/api/auth/login`
+- GET `/api/dashboard/resumen`
+
+#### Login
+
+Request:
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "username": "martina.f",
+  "password": "123456"
+}
+```
+
+Response exitosa:
+
+```json
+{
+  "token": "JWT_TOKEN",
+  "username": "martina.f",
+  "rol": "USER"
+}
+```
+
+#### Resumen del dashboard
+
+Request:
+
+```http
+GET /api/dashboard/resumen
+Authorization: Bearer JWT_TOKEN
+```
+
+Response con base vacía:
+
+```json
+{
+  "totalCreditos": 0,
+  "montoTotalPrestado": 0,
+  "montoTotalCobrado": 0,
+  "porcentajeRecupero": 0,
+  "cantidadCreditosActivos": 0,
+  "cantidadCreditosEnMora": 0,
+  "creditosPorEstado": []
+}
+```
+
+Response con datos reales cargados:
+
+```json
+{
+  "totalCreditos": 1,
+  "montoTotalPrestado": 200000.00,
+  "montoTotalCobrado": 23000.00,
+  "porcentajeRecupero": 11.50,
+  "cantidadCreditosActivos": 0,
+  "cantidadCreditosEnMora": 1,
+  "creditosPorEstado": [
+    {
+      "estado": "ACTIVO",
+      "cantidad": 0
+    },
+    {
+      "estado": "EN_MORA",
+      "cantidad": 1
+    },
+    {
+      "estado": "FINALIZADO",
+      "cantidad": 0
+    }
+  ]
+}
+```
+
+### Cómo probar el dashboard con JWT
+
+1. Autenticarse con `POST /api/auth/login`
+2. Copiar el token JWT de la respuesta
+3. Llamar `GET /api/dashboard/resumen` con header `Authorization: Bearer <token>`
+
+Ejemplo con `curl`:
+
+```bash
+curl -i -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"martina.f","password":"123456"}'
+```
+
+```bash
+curl -i http://localhost:8080/api/dashboard/resumen \
+  -H "Authorization: Bearer JWT_TOKEN"
+```
+
+Validación realizada en el proyecto:
+
+- login correcto con obtención de token JWT
+- acceso denegado al dashboard sin token
+- respuesta `200 OK` al dashboard con token válido
+- respuesta correcta tanto con base vacía como con datos reales cargados
+- lógica del dashboard validada además con tests de integración del service
+
+### Manejo básico de errores y comportamiento con base vacía
+
+- sin autenticación, el endpoint del dashboard rechaza la solicitud
+- con base vacía, el endpoint responde con ceros y lista vacía, sin devolver valores nulos
+
+### Métrica no implementada en esta entrega
+
+No se implementó la métrica de cobranzas por mes.
+
+La razón es que el modelo actual de `Cobranza` no guarda una fecha real de cobranza, por lo que esa estadística no puede calcularse de forma consistente sin cambiar el alcance del proyecto.
+
+### Conclusión breve del módulo
+
+La Entrega 1 del módulo 5 quedó resuelta como un dashboard de métricas calculadas a partir del modelo existente. La solución mantiene la arquitectura real del proyecto, reutiliza la seguridad JWT ya implementada y expone un único endpoint protegido para consultar el resumen estadístico del sistema.
 
 ---
 

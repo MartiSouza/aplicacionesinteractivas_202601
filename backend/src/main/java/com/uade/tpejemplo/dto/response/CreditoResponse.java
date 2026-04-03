@@ -1,5 +1,6 @@
 package com.uade.tpejemplo.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -15,6 +16,7 @@ public class CreditoResponse {
     private String dniCliente;
     private String nombreCliente;
     private BigDecimal deudaOriginal;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate fecha;
     private BigDecimal importeCuota;
     private Integer cantidadCuotas;
