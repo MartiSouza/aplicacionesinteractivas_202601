@@ -12,4 +12,8 @@ public interface ClienteService {
     ClienteResponse buscarPorDni(String dni);
 
     List<ClienteResponse> listarTodos();
+
+    ClienteResponse actualizar(String dni, ClienteRequest request);
+
+    void eliminar(String dni);
 }

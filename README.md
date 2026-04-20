@@ -42,16 +42,18 @@ tpejemplo/
 │           └── DashboardService / DashboardServiceImpl
 └── frontend/              → Proyecto React + Vite
     └── src/
-        ├── api/           → apiClient.js, auth.js, clientes.js, creditos.js, cobranzas.js
+  ├── api/           → apiClient.js, auth.js, clientes.js, creditos.js, cobranzas.js, dashboard.js
         ├── components/    → Navbar.jsx, PrivateRoute.jsx
         ├── store/
         │   ├── index.js                  → configureStore (combina reducers)
         │   └── slices/
         │       ├── authSlice.js          → login/register thunks + logout
-        │       ├── clientesSlice.js      → fetchClientes + addCliente
+  │       ├── clientesSlice.js      → fetchClientes + add/edit/removeCliente
         │       ├── creditosSlice.js      → fetchCreditosPorCliente + addCredito
-        │       └── cobranzasSlice.js     → fetchCobranzasPorCredito + addCobranza
-        └── pages/         → Login.jsx, Register.jsx, Clientes.jsx, Creditos.jsx, Cobranzas.jsx
+  │       ├── cobranzasSlice.js     → fetchCobranzasPorCredito + addCobranza
+  │       └── dashboardSlice.js     → fetchDashboardResumen
+  ├── test/          → setupTests.js
+  └── pages/         → Login.jsx, Register.jsx, Clientes.jsx, Creditos.jsx, Cobranzas.jsx, Dashboard.jsx
 ```
 
 ---
@@ -114,6 +116,8 @@ tpejemplo/
 | POST | `/api/clientes` | Crear cliente |
 | GET | `/api/clientes` | Listar todos |
 | GET | `/api/clientes/{dni}` | Buscar por DNI |
+| PUT | `/api/clientes/{dni}` | Editar cliente |
+| DELETE | `/api/clientes/{dni}` | Eliminar cliente si no tiene créditos asociados |
 
 ### Créditos (requiere JWT)
 | Método | Endpoint | Descripción |
@@ -330,6 +334,75 @@ La razón es que el modelo actual de `Cobranza` no guarda una fecha real de cobr
 ### Conclusión breve del módulo
 
 La Entrega 1 del módulo 5 quedó resuelta como un dashboard de métricas calculadas a partir del modelo existente. La solución mantiene la arquitectura real del proyecto, reutiliza la seguridad JWT ya implementada y expone un único endpoint protegido para consultar el resumen estadístico del sistema.
+
+---
+
+## Frontend – Entrega 2
+
+### Descripción general
+
+En esta segunda entrega del frontend se integró el módulo 5, Dashboard de estadísticas, respetando la arquitectura y las tecnologías definidas por el proyecto base. La implementación se realizó con React, React Router y Redux Toolkit, manteniendo la comunicación con el backend mediante la API REST existente y reutilizando el esquema de autenticación con JWT ya provisto por el sistema.
+
+El dashboard no se resolvió como una entidad propia ni como un CRUD independiente, ya que funcionalmente representa una vista de métricas calculadas a partir de información existente del sistema. Por ese motivo, el frontend se limita a autenticarse, consumir el endpoint correspondiente y visualizar los indicadores devueltos por el backend.
+
+### Autenticación y acceso protegido
+
+Se reutilizó el flujo de autenticación ya implementado en el proyecto base. El login existente continúa siendo el punto de entrada al sistema y, una vez autenticado el usuario, el token JWT se utiliza para acceder a las pantallas protegidas.
+
+Para preservar la seguridad y la coherencia con la arquitectura original, se mantuvo el uso de rutas protegidas mediante `PrivateRoute`. De esta forma, tanto el acceso al dashboard como al resto de los módulos autenticados depende de una sesión válida. Además, se incorporó el manejo de sesión expirada ante respuestas `401`, limpiando la sesión local y redirigiendo nuevamente al login.
+
+### Módulo Dashboard de estadísticas
+
+Se agregó una nueva pantalla accesible mediante la ruta `/dashboard`, integrada dentro de la navegación autenticada del frontend. Esta pantalla consume el endpoint `GET /api/dashboard/resumen` y muestra las métricas principales del sistema en una vista resumida y clara.
+
+Las métricas visualizadas incluyen:
+
+- total de créditos
+- monto total prestado
+- monto total cobrado
+- porcentaje de recupero
+- cantidad de créditos activos
+- cantidad de créditos en mora
+- distribución de créditos por estado
+
+Además de la visualización de datos, la pantalla contempla estados básicos de carga y error, de modo que el comportamiento sea consistente frente a demoras o fallas en la respuesta del backend.
+
+### Integración con la arquitectura existente
+
+La incorporación del dashboard se realizó sin modificar la estructura general del frontend. Se respetó el patrón ya utilizado por el proyecto, organizado por dominio en tres capas: acceso a API, slice de Redux Toolkit y página de visualización.
+
+En este sentido, el módulo Dashboard se integró siguiendo el esquema `api + slice + page`, reutilizando el `apiClient` existente para las llamadas HTTP y el store global para la gestión del estado. No fue necesario rehacer el login, el router ni la estructura base del proyecto.
+
+### Alta, baja y modificación sobre entidades reales
+
+Dado que el dashboard no admite ABM propio por no ser una entidad persistente, las operaciones de alta, baja y modificación se resolvieron sobre una entidad real del sistema efectivamente expuesta para su gestión: Cliente.
+
+En el frontend quedó disponible la gestión básica de clientes, incluyendo:
+
+- alta de cliente
+- edición de cliente
+- eliminación de cliente
+
+La baja de cliente respeta una regla de negocio validada en backend: no se permite eliminar un cliente si posee créditos asociados. De esta forma, la aplicación conserva integridad funcional y evita operaciones inconsistentes sobre datos relacionados.
+
+### Testing del frontend
+
+Se agregó una base mínima de testing para validar el módulo incorporado, manteniendo una solución simple y acorde al proyecto. Para ello se utilizó Vitest, integrado con la configuración actual del frontend basada en Vite.
+
+Se implementaron pruebas sobre:
+
+- `dashboardSlice`
+- `Dashboard.jsx`
+
+Estas pruebas validan los escenarios principales del módulo:
+
+- estado de carga
+- manejo de error
+- render correcto de métricas con datos disponibles
+
+### Cierre
+
+La Entrega 2 del frontend quedó resuelta manteniendo la arquitectura del sistema base, sin alterar el stack tecnológico ni introducir un CRUD artificial para el dashboard. El módulo principal implementado fue el Dashboard de estadísticas como vista protegida de métricas, complementado con operaciones de alta, modificación y baja sobre la entidad real Cliente para reforzar el cumplimiento de la consigna general sobre entidades efectivamente gestionables del sistema.
 
 ---
 

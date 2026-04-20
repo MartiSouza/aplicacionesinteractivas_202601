@@ -32,4 +32,17 @@ public class ClienteController {
     public ResponseEntity<List<ClienteResponse>> listarTodos() {
         return ResponseEntity.ok(clienteService.listarTodos());
     }
+
+    @PutMapping("/{dni}")
+    public ResponseEntity<ClienteResponse> actualizar(@PathVariable String dni, @Valid @RequestBody ClienteRequest request) {
+        // CAMBIO: endpoint para actualizar datos basicos del cliente.
+        return ResponseEntity.ok(clienteService.actualizar(dni, request));
+    }
+
+    @DeleteMapping("/{dni}")
+    public ResponseEntity<Void> eliminar(@PathVariable String dni) {
+        // CAMBIO: endpoint para eliminar cliente si no tiene creditos asociados.
+        clienteService.eliminar(dni);
+        return ResponseEntity.noContent().build();
+    }
 }

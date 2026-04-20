@@ -6,6 +6,7 @@ import com.uade.tpejemplo.exception.BusinessException;
 import com.uade.tpejemplo.exception.ResourceNotFoundException;
 import com.uade.tpejemplo.model.Cliente;
 import com.uade.tpejemplo.repository.ClienteRepository;
+import com.uade.tpejemplo.repository.CreditoRepository;
 import com.uade.tpejemplo.service.ClienteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.List;
 public class ClienteServiceImpl implements ClienteService {
 
     private final ClienteRepository clienteRepository;
+    private final CreditoRepository creditoRepository;
 
     @Override
     public ClienteResponse crear(ClienteRequest request) {
@@ -40,6 +42,30 @@ public class ClienteServiceImpl implements ClienteService {
         return clienteRepository.findAll().stream()
             .map(this::toResponse)
             .toList();
+    }
+
+    @Override
+    public ClienteResponse actualizar(String dni, ClienteRequest request) {
+        Cliente cliente = clienteRepository.findByDni(dni)
+            .orElseThrow(() -> new ResourceNotFoundException("Cliente", "DNI", dni));
+
+        // CAMBIO: actualiza solo los datos basicos del cliente existente.
+        cliente.setNombre(request.getNombre());
+        clienteRepository.save(cliente);
+        return toResponse(cliente);
+    }
+
+    @Override
+    public void eliminar(String dni) {
+        Cliente cliente = clienteRepository.findByDni(dni)
+            .orElseThrow(() -> new ResourceNotFoundException("Cliente", "DNI", dni));
+
+        // CAMBIO: impedir eliminacion si el cliente ya tiene creditos asociados.
+        if (creditoRepository.existsByClienteDni(dni)) {
+            throw new BusinessException("No se puede eliminar el cliente porque tiene creditos asociados");
+        }
+
+        clienteRepository.delete(cliente);
     }
 
     private ClienteResponse toResponse(Cliente cliente) {

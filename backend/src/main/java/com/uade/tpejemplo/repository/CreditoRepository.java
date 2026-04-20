@@ -14,6 +14,8 @@ public interface CreditoRepository extends JpaRepository<Credito, Long> {
 
     List<Credito> findByClienteDni(String dni);
 
+    boolean existsByClienteDni(String dni);
+
     @Query("select coalesce(sum(c.deudaOriginal), 0) from Credito c")
     BigDecimal sumDeudaOriginal();
 
