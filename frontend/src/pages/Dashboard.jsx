@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchDashboardResumen, fetchDashboardCreditosPorEstado } from '../store/slices/dashboardSlice';
+import './Dashboard.css';
 
 const formatCurrency = (value) => Number(value ?? 0).toLocaleString('es-AR', {
   style: 'currency',
@@ -23,56 +24,56 @@ export default function Dashboard() {
   }, [dispatch]);
 
   return (
-    <div style={styles.page}>
-      <h2 style={styles.title}>Dashboard</h2>
+    <div className="dashboard-page">
+      <h2 className="dashboard-title">Dashboard</h2>
 
       {loading && (
-        <div style={styles.card}>
-          <p style={styles.empty}>Cargando métricas...</p>
+        <div className="dashboard-card">
+          <p className="dashboard-empty">Cargando métricas...</p>
         </div>
       )}
 
       {error && (
-        <div style={styles.card}>
-          <div style={styles.error}>{error}</div>
+        <div className="dashboard-card">
+          <div className="dashboard-error">{error}</div>
         </div>
       )}
 
       {!loading && !error && resumen && (
         <>
-          <div style={styles.grid}>
-            <div style={styles.metricCard}>
-              <span style={styles.metricLabel}>Total de créditos</span>
-              <strong style={styles.metricValue}>{resumen.totalCreditos}</strong>
+          <div className="dashboard-grid">
+            <div className="dashboard-metric-card">
+              <span className="dashboard-metric-label">Total de créditos</span>
+              <strong className="dashboard-metric-value">{resumen.totalCreditos}</strong>
             </div>
-            <div style={styles.metricCard}>
-              <span style={styles.metricLabel}>Monto total prestado</span>
-              <strong style={styles.metricValue}>{formatCurrency(resumen.montoTotalPrestado)}</strong>
+            <div className="dashboard-metric-card">
+              <span className="dashboard-metric-label">Monto total prestado</span>
+              <strong className="dashboard-metric-value">{formatCurrency(resumen.montoTotalPrestado)}</strong>
             </div>
-            <div style={styles.metricCard}>
-              <span style={styles.metricLabel}>Monto total cobrado</span>
-              <strong style={styles.metricValue}>{formatCurrency(resumen.montoTotalCobrado)}</strong>
+            <div className="dashboard-metric-card">
+              <span className="dashboard-metric-label">Monto total cobrado</span>
+              <strong className="dashboard-metric-value">{formatCurrency(resumen.montoTotalCobrado)}</strong>
             </div>
-            <div style={styles.metricCard}>
-              <span style={styles.metricLabel}>Porcentaje de recupero</span>
-              <strong style={styles.metricValue}>{formatPercentage(resumen.porcentajeRecupero)}</strong>
+            <div className="dashboard-metric-card">
+              <span className="dashboard-metric-label">Porcentaje de recupero</span>
+              <strong className="dashboard-metric-value">{formatPercentage(resumen.porcentajeRecupero)}</strong>
             </div>
-            <div style={styles.metricCard}>
-              <span style={styles.metricLabel}>Créditos activos</span>
-              <strong style={styles.metricValue}>{resumen.cantidadCreditosActivos}</strong>
+            <div className="dashboard-metric-card">
+              <span className="dashboard-metric-label">Créditos activos</span>
+              <strong className="dashboard-metric-value">{resumen.cantidadCreditosActivos}</strong>
             </div>
-            <div style={styles.metricCard}>
-              <span style={styles.metricLabel}>Créditos en mora</span>
-              <strong style={styles.metricValue}>{resumen.cantidadCreditosEnMora}</strong>
+            <div className="dashboard-metric-card">
+              <span className="dashboard-metric-label">Créditos en mora</span>
+              <strong className="dashboard-metric-value">{resumen.cantidadCreditosEnMora}</strong>
             </div>
           </div>
 
-          <div style={styles.card}>
-            <h3 style={styles.subtitle}>Créditos por estado</h3>
+          <div className="dashboard-card">
+            <h3 className="dashboard-subtitle">Créditos por estado</h3>
             {creditosPorEstado.length === 0 ? (
-              <p style={styles.empty}>No hay métricas por estado para mostrar.</p>
+              <p className="dashboard-empty">No hay métricas por estado para mostrar.</p>
             ) : (
-              <table style={styles.table}>
+              <table className="dashboard-table">
                 <thead>
                   <tr>
                     <th>Estado</th>
@@ -95,42 +96,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-const styles = {
-  page: { padding: '32px', maxWidth: '1000px', margin: '0 auto' },
-  title: { color: '#1e3a5f', marginBottom: '24px' },
-  subtitle: { color: '#1e3a5f', marginBottom: '16px' },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-    gap: '16px',
-    marginBottom: '24px',
-  },
-  card: {
-    background: 'white',
-    padding: '24px',
-    borderRadius: '12px',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
-    marginBottom: '24px',
-  },
-  metricCard: {
-    background: 'white',
-    padding: '20px',
-    borderRadius: '12px',
-    boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  metricLabel: { color: '#546e7a', fontSize: '0.95rem' },
-  metricValue: { color: '#1e3a5f', fontSize: '1.5rem' },
-  error: {
-    background: '#ffebee',
-    color: '#c62828',
-    padding: '10px',
-    borderRadius: '6px',
-    fontSize: '0.9rem',
-  },
-  empty: { color: '#999' },
-  table: { width: '100%', borderCollapse: 'collapse' },
-};

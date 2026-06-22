@@ -1,0 +1,78 @@
+.dashboard-page {
+  padding: 32px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.dashboard-title {
+  color: #1e3a5f;
+  margin-bottom: 24px;
+}
+
+.dashboard-subtitle {
+  color: #1e3a5f;
+  margin-bottom: 16px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dashboard-card {
+  background: #fff;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+}
+
+.dashboard-metric-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dashboard-metric-label {
+  color: #546e7a;
+  font-size: 0.95rem;
+}
+
+.dashboard-metric-value {
+  color: #1e3a5f;
+  font-size: 1.5rem;
+}
+
+.dashboard-error {
+  background: #ffebee;
+  color: #c62828;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.dashboard-empty {
+  color: #999;
+}
+
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+@media (max-width: 640px) {
+  .dashboard-page {
+    padding: 24px 16px;
+  }
+
+  .dashboard-card,
+  .dashboard-metric-card {
+    padding: 18px;
+  }
+}
