@@ -4,6 +4,7 @@ import clientesReducer  from './slices/clientesSlice';
 import creditosReducer  from './slices/creditosSlice';
 import cobranzasReducer from './slices/cobranzasSlice';
 import dashboardReducer from './slices/dashboardSlice';
+import permisosReducer from './slices/permisosSlice';
 
 const store = configureStore({
   reducer: {
@@ -11,8 +12,8 @@ const store = configureStore({
     clientes:  clientesReducer,
     creditos:  creditosReducer,
     cobranzas: cobranzasReducer,
-    // CAMBIO: registrar el reducer del dashboard en el store global.
     dashboard: dashboardReducer,
+    permisos: permisosReducer,
   },
 });
 

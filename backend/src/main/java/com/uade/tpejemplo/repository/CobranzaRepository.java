@@ -13,11 +13,15 @@ public interface CobranzaRepository extends JpaRepository<Cobranza, Long> {
 
     List<Cobranza> findByCuotaIdIdCredito(Long idCredito);
 
-    boolean existsByCuotaIdIdCreditoAndCuotaIdIdCuota(Long idCredito, Integer idCuota);
+    boolean existsByCuotaCreditoId(Long idCredito);
 
-    @Query("select coalesce(sum(c.importe), 0) from Cobranza c")
+    boolean existsByCuotaIdIdCreditoAndCuotaIdIdCuotaAndAnuladaFalse(Long idCredito, Integer idCuota);
+
+    boolean existsByCuotaCreditoIdAndAnuladaFalse(Long idCredito);
+
+    @Query("select coalesce(sum(c.importe), 0) from Cobranza c where c.anulada = false")
     BigDecimal sumImporteCobrado();
 
-    @Query("select c from Cobranza c join fetch c.cuota")
+    @Query("select c from Cobranza c join fetch c.cuota where c.anulada = false")
     List<Cobranza> findAllWithCuota();
 }

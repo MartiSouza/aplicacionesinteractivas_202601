@@ -3,6 +3,7 @@ package com.uade.tpejemplo.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -33,6 +34,15 @@ public class Usuario implements UserDetails {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Rol rol;
+
+    // CAMBIO: permisos específicos para habilitar anulación de créditos y cobranzas desde el gestor admin.
+    @Default
+    @Column(nullable = false)
+    private boolean puedeAnularCredito = false;
+
+    @Default
+    @Column(nullable = false)
+    private boolean puedeAnularCobranza = false;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

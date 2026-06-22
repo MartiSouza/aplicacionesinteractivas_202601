@@ -17,11 +17,12 @@ export default function Navbar() {
       <span style={styles.brand}>💳 Créditos UADE</span>
       {user && (
         <div style={styles.links}>
-          {/* CAMBIO: acceso al dashboard desde la navegación autenticada. */}
           <Link to="/dashboard" style={styles.link}>Dashboard</Link>
           <Link to="/clientes"  style={styles.link}>Clientes</Link>
           <Link to="/creditos"  style={styles.link}>Créditos</Link>
           <Link to="/cobranzas" style={styles.link}>Cobranzas</Link>
+          {/* CAMBIO: acceso al gestor de permisos solo visible para ADMIN. */}
+          {user.rol === 'ADMIN' && <Link to="/admin/permisos" style={styles.link}>Permisos</Link>}
           <span style={styles.user}>👤 {user.username}</span>
           <button onClick={handleLogout} style={styles.btn}>Salir</button>
         </div>

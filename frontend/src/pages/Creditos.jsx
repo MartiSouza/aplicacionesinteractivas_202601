@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchCreditosPorCliente, addCredito, clearCreditos } from '../store/slices/creditosSlice';
+import { fetchCreditosPorCliente, addCredito, anularCredito, clearCreditos, clearError } from '../store/slices/creditosSlice';
 
 // Función para formatear fechas
 const formatearFecha = (fechaString) => {
@@ -12,12 +12,15 @@ const formatearFecha = (fechaString) => {
 export default function Creditos() {
   const dispatch = useDispatch();
   const { lista, loading, error } = useSelector((state) => state.creditos);
+  // CAMBIO: se usa el usuario autenticado para mostrar u ocultar acciones de anulación.
+  const user = useSelector((state) => state.auth.user);
   const [dni, setDni]   = useState('');
   const [buscado, setBuscado] = useState(false);
   const [form, setForm] = useState({ dniCliente:'', deudaOriginal:'', fecha:'', importeCuota:'', cantidadCuotas:'' });
 
   const buscar = async (e) => {
     e.preventDefault();
+    dispatch(clearError());
     dispatch(clearCreditos());
     const result = await dispatch(fetchCreditosPorCliente(dni));
     if (result.meta.requestStatus === 'fulfilled') setBuscado(true);
@@ -25,6 +28,7 @@ export default function Creditos() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    dispatch(clearError());
     const payload = {
       ...form,
       deudaOriginal:  Number(form.deudaOriginal),
@@ -38,9 +42,17 @@ export default function Creditos() {
     }
   };
 
+  // CAMBIO: la anulación se delega al backend y reutiliza el manejo global de errores del slice.
+  const handleAnular = async (id) => {
+    dispatch(clearError());
+    await dispatch(anularCredito(id));
+  };
+
   return (
     <div style={styles.page}>
       <h2 style={styles.title}>Créditos</h2>
+
+      {error && <div style={styles.error}>{error}</div>}
 
       <div style={styles.card}>
         <h3>Buscar créditos por cliente</h3>
@@ -52,7 +64,6 @@ export default function Creditos() {
 
       <div style={styles.card}>
         <h3>Nuevo crédito</h3>
-        {error && <div style={styles.error}>{error}</div>}
         <form onSubmit={handleSubmit} style={styles.grid}>
           <input style={styles.input} placeholder="DNI cliente"          value={form.dniCliente}     onChange={e => setForm({...form, dniCliente: e.target.value})}     required />
           <input style={styles.input} placeholder="Deuda original"       value={form.deudaOriginal}  onChange={e => setForm({...form, deudaOriginal: e.target.value})}  type="number" required />
@@ -69,8 +80,20 @@ export default function Creditos() {
           {loading && <p style={styles.empty}>Cargando...</p>}
           {!loading && lista.length === 0 && <p style={styles.empty}>Sin créditos.</p>}
           {lista.map(cr => (
-            <div key={cr.id} style={styles.creditoBox}>
-              <p><strong>ID #{cr.id}</strong> — Deuda: ${cr.deudaOriginal} — {cr.cantidadCuotas} cuotas de ${cr.importeCuota}</p>
+            // CAMBIO: los créditos anulados se distinguen visualmente y pierden la acción de anular.
+            <div key={cr.id} style={{ ...styles.creditoBox, ...(cr.anulado ? styles.creditoAnulado : {}) }}>
+              <div style={styles.creditoHeader}>
+                <p style={cr.anulado ? styles.textoAnulado : undefined}><strong>ID #{cr.id}</strong> — Deuda: ${cr.deudaOriginal} — {cr.cantidadCuotas} cuotas de ${cr.importeCuota}</p>
+                {cr.anulado ? (
+                  <span style={styles.badgeAnulado}>ANULADO</span>
+                ) : (
+                  user?.puedeAnularCredito && (
+                    <button type="button" onClick={() => handleAnular(cr.id)} style={styles.secondaryBtn} disabled={loading}>
+                      Anular
+                    </button>
+                  )
+                )}
+              </div>
               <table style={styles.table}>
                 <thead><tr><th>#</th><th>Vencimiento</th><th>Estado</th></tr></thead>
                 <tbody>
@@ -102,5 +125,10 @@ const styles = {
   error:      { background:'#ffebee', color:'#c62828', padding:'10px', borderRadius:'6px', marginBottom:'12px', fontSize:'0.9rem' },
   empty:      { color:'#999' },
   creditoBox: { borderLeft:'4px solid #1e3a5f', paddingLeft:'16px', marginBottom:'20px' },
+  creditoHeader: { display:'flex', justifyContent:'space-between', alignItems:'center', gap:'12px', flexWrap:'wrap' },
+  creditoAnulado: { opacity:0.75, borderLeft:'4px solid #9e9e9e' },
+  textoAnulado: { textDecoration:'line-through', color:'#616161' },
+  badgeAnulado: { background:'#fbe9e7', color:'#bf360c', padding:'6px 10px', borderRadius:'999px', fontSize:'0.8rem', fontWeight:'bold' },
+  secondaryBtn: { padding:'8px 14px', backgroundColor:'#c62828', color:'white', border:'none', borderRadius:'6px', cursor:'pointer', fontWeight:'bold' },
   table:      { width:'100%', borderCollapse:'collapse', marginTop:'8px' },
 };

@@ -6,18 +6,16 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class AuthResponse {
+public class UsuarioResponse {
 
-    private String token;
     private Long id;
     private String username;
     private String rol;
     private boolean puedeAnularCredito;
     private boolean puedeAnularCobranza;
 
-    public static AuthResponse from(String token, Usuario usuario) {
-        return new AuthResponse(
-            token,
+    public static UsuarioResponse from(Usuario usuario) {
+        return new UsuarioResponse(
             usuario.getId(),
             usuario.getUsername(),
             usuario.getRol().name(),

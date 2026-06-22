@@ -40,13 +40,15 @@ public class AuthController {
             .username(request.getUsername())
             .password(passwordEncoder.encode(request.getPassword()))
             .rol(Rol.USER)
+            .puedeAnularCredito(false)
+            .puedeAnularCobranza(false)
             .build();
 
         usuarioRepository.save(usuario);
 
         String token = jwtUtil.generarToken(usuario);
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(new AuthResponse(token, usuario.getUsername(), usuario.getRol().name()));
+            .body(AuthResponse.from(token, usuario));
     }
 
     @PostMapping("/login")
@@ -59,6 +61,6 @@ public class AuthController {
         String token = jwtUtil.generarToken(userDetails);
 
         Usuario usuario = (Usuario) userDetails;
-        return ResponseEntity.ok(new AuthResponse(token, usuario.getUsername(), usuario.getRol().name()));
+        return ResponseEntity.ok(AuthResponse.from(token, usuario));
     }
 }

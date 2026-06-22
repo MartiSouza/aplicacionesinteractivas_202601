@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import dashboardReducer, { fetchDashboardResumen } from './dashboardSlice';
+import dashboardReducer, { fetchDashboardResumen, fetchDashboardCreditosPorEstado } from './dashboardSlice';
 
 describe('dashboardSlice', () => {
   it('devuelve el estado inicial', () => {
@@ -8,8 +8,10 @@ describe('dashboardSlice', () => {
 
     expect(state).toEqual({
       resumen: null,
+      creditosPorEstado: [],
       loading: false,
       error: null,
+      pendingRequests: 0,
     });
   });
 
@@ -20,6 +22,7 @@ describe('dashboardSlice', () => {
     expect(state.loading).toBe(true);
     expect(state.error).toBeNull();
     expect(state.resumen).toBeNull();
+    expect(state.creditosPorEstado).toEqual([]);
   });
 
   it('maneja fulfilled', () => {
@@ -39,6 +42,7 @@ describe('dashboardSlice', () => {
     expect(state.loading).toBe(false);
     expect(state.error).toBeNull();
     expect(state.resumen).toEqual(payload);
+    expect(state.creditosPorEstado).toEqual(payload.creditosPorEstado);
   });
 
   it('maneja rejected', () => {
@@ -52,5 +56,15 @@ describe('dashboardSlice', () => {
 
     expect(state.loading).toBe(false);
     expect(state.error).toBe('No se pudo obtener el dashboard');
+  });
+
+  it('maneja creditos por estado fulfilled', () => {
+    const payload = [{ estado: 'ACTIVO', cantidad: 2 }];
+
+    const state = dashboardReducer(undefined, fetchDashboardCreditosPorEstado.fulfilled(payload, '', undefined));
+
+    expect(state.creditosPorEstado).toEqual(payload);
+    expect(state.loading).toBe(false);
+    expect(state.error).toBeNull();
   });
 });

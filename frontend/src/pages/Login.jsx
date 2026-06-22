@@ -12,7 +12,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const result = await dispatch(loginThunk(form));
-    if (result.meta.requestStatus === 'fulfilled') navigate('/clientes');
+    if (result.meta.requestStatus === 'fulfilled') navigate('/dashboard');
   };
 
   return (

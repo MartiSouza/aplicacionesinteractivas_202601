@@ -16,10 +16,12 @@ public interface CreditoRepository extends JpaRepository<Credito, Long> {
 
     boolean existsByClienteDni(String dni);
 
-    @Query("select coalesce(sum(c.deudaOriginal), 0) from Credito c")
+    long countByAnuladoFalse();
+
+    @Query("select coalesce(sum(c.deudaOriginal), 0) from Credito c where c.anulado = false")
     BigDecimal sumDeudaOriginal();
 
     @EntityGraph(attributePaths = "cuotas")
-    @Query("select distinct c from Credito c left join fetch c.cuotas")
+    @Query("select distinct c from Credito c left join fetch c.cuotas where c.anulado = false")
     List<Credito> findAllWithCuotas();
 }

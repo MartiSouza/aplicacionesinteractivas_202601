@@ -43,10 +43,21 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
 
+        Usuario adminDemo = Usuario.builder()
+            .username("admin")
+            .password(passwordEncoder.encode("123456"))
+            .rol(Rol.ADMIN)
+            .puedeAnularCredito(true)
+            .puedeAnularCobranza(true)
+            .build();
+        usuarioRepository.save(adminDemo);
+
         Usuario usuarioDemo = Usuario.builder()
             .username("martina.f")
             .password(passwordEncoder.encode("123456"))
             .rol(Rol.USER)
+            .puedeAnularCredito(false)
+            .puedeAnularCobranza(false)
             .build();
         usuarioRepository.save(usuarioDemo);
 
@@ -97,6 +108,7 @@ public class DataSeeder implements CommandLineRunner {
             fecha,
             importeCuota,
             cantidadCuotas,
+            false,
             null
         ));
 
@@ -115,6 +127,6 @@ public class DataSeeder implements CommandLineRunner {
 
     private void registrarCobranza(Long idCredito, int idCuota, BigDecimal importe) {
         cuotaRepository.findById(new CuotaId(idCredito, idCuota))
-            .ifPresent(cuota -> cobranzaRepository.save(new Cobranza(null, cuota, importe)));
+            .ifPresent(cuota -> cobranzaRepository.save(new Cobranza(null, cuota, importe, LocalDate.now(), false)));
     }
 }

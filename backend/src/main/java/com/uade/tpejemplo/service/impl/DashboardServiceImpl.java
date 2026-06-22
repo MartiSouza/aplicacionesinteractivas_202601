@@ -35,7 +35,7 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public DashboardResumenResponse obtenerResumen() {
-        long totalCreditos = creditoRepository.count();
+        long totalCreditos = creditoRepository.countByAnuladoFalse();
         BigDecimal montoTotalPrestado = defaultZero(creditoRepository.sumDeudaOriginal());
         BigDecimal montoTotalCobrado = defaultZero(cobranzaRepository.sumImporteCobrado());
 
@@ -64,6 +64,8 @@ public class DashboardServiceImpl implements DashboardService {
             creditosPorEstado.computeIfPresent(estado, (key, value) -> value + 1);
         }
 
+        List<CreditosPorEstadoResponse> estadoResponse = toEstadoResponseList(creditosPorEstado);
+
         return new DashboardResumenResponse(
             totalCreditos,
             montoTotalPrestado,
@@ -71,8 +73,13 @@ public class DashboardServiceImpl implements DashboardService {
             porcentajeRecupero,
             creditosPorEstado.get(ESTADO_ACTIVO),
             creditosPorEstado.get(ESTADO_EN_MORA),
-            toEstadoResponseList(creditosPorEstado)
+            estadoResponse
         );
+    }
+
+    @Override
+    public List<CreditosPorEstadoResponse> obtenerCreditosPorEstado() {
+        return obtenerResumen().getCreditosPorEstado();
     }
 
     private BigDecimal calcularPorcentajeRecupero(BigDecimal montoTotalCobrado, BigDecimal montoTotalPrestado) {

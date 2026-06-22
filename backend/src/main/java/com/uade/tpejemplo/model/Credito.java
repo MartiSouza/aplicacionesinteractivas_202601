@@ -43,6 +43,20 @@ public class Credito {
     @Column(name = "cantidad_cuotas", nullable = false)
     private Integer cantidadCuotas;
 
+    // CAMBIO: baja lógica para anulación de créditos sin eliminar el registro.
+    @Column(nullable = false)
+    private boolean anulado = false;
+
     @OneToMany(mappedBy = "credito", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Cuota> cuotas;
+
+    public Credito(Long id,
+                   Cliente cliente,
+                   BigDecimal deudaOriginal,
+                   LocalDate fecha,
+                   BigDecimal importeCuota,
+                   Integer cantidadCuotas,
+                   List<Cuota> cuotas) {
+        this(id, cliente, deudaOriginal, fecha, importeCuota, cantidadCuotas, false, cuotas);
+    }
 }

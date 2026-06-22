@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchDashboardResumen } from '../store/slices/dashboardSlice';
+import { fetchDashboardResumen, fetchDashboardCreditosPorEstado } from '../store/slices/dashboardSlice';
 
 const formatCurrency = (value) => Number(value ?? 0).toLocaleString('es-AR', {
   style: 'currency',
@@ -15,11 +15,11 @@ const formatPercentage = (value) => `${Number(value ?? 0).toLocaleString('es-AR'
 
 export default function Dashboard() {
   const dispatch = useDispatch();
-  const { resumen, loading, error } = useSelector((state) => state.dashboard);
+  const { resumen, creditosPorEstado, loading, error } = useSelector((state) => state.dashboard);
 
   useEffect(() => {
-    // CAMBIO: cargar el resumen del dashboard al montar la pantalla.
     dispatch(fetchDashboardResumen());
+    dispatch(fetchDashboardCreditosPorEstado());
   }, [dispatch]);
 
   return (
@@ -69,7 +69,7 @@ export default function Dashboard() {
 
           <div style={styles.card}>
             <h3 style={styles.subtitle}>Créditos por estado</h3>
-            {resumen.creditosPorEstado.length === 0 ? (
+            {creditosPorEstado.length === 0 ? (
               <p style={styles.empty}>No hay métricas por estado para mostrar.</p>
             ) : (
               <table style={styles.table}>
@@ -80,7 +80,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {resumen.creditosPorEstado.map((item) => (
+                  {creditosPorEstado.map((item) => (
                     <tr key={item.estado}>
                       <td>{item.estado}</td>
                       <td>{item.cantidad}</td>

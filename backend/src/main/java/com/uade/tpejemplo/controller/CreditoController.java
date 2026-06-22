@@ -32,4 +32,9 @@ public class CreditoController {
     public ResponseEntity<List<CreditoResponse>> listarPorCliente(@PathVariable String dni) {
         return ResponseEntity.ok(creditoService.listarPorCliente(dni));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<CreditoResponse> anular(@PathVariable Long id) {
+        return ResponseEntity.ok(creditoService.anular(id));
+    }
 }

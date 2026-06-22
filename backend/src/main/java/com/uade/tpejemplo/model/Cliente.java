@@ -23,6 +23,8 @@ public class Cliente {
     @Column(name = "nombre", nullable = false)
     private String nombre;
 
+
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Credito> creditos;
+
 }

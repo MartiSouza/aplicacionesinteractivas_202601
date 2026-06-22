@@ -10,8 +10,8 @@ vi.mock('../store/slices/dashboardSlice', async () => {
 
   return {
     ...actual,
-    // CAMBIO: evitar llamada real y dejar el efecto estable para los tests de render.
     fetchDashboardResumen: vi.fn(() => ({ type: 'dashboard/fetchResumen' })),
+    fetchDashboardCreditosPorEstado: vi.fn(() => ({ type: 'dashboard/fetchCreditosPorEstado' })),
   };
 });
 
@@ -37,8 +37,10 @@ describe('Dashboard', () => {
     // CAMBIO: validar estado visual de carga.
     renderWithState({
       resumen: null,
+      creditosPorEstado: [],
       loading: true,
       error: null,
+      pendingRequests: 1,
     });
 
     expect(screen.getByText('Cargando métricas...')).toBeInTheDocument();
@@ -48,8 +50,10 @@ describe('Dashboard', () => {
     // CAMBIO: validar render cuando hay error.
     renderWithState({
       resumen: null,
+      creditosPorEstado: [],
       loading: false,
       error: 'Error al cargar dashboard',
+      pendingRequests: 0,
     });
 
     expect(screen.getByText('Error al cargar dashboard')).toBeInTheDocument();
@@ -60,6 +64,11 @@ describe('Dashboard', () => {
     renderWithState({
       loading: false,
       error: null,
+      pendingRequests: 0,
+      creditosPorEstado: [
+        { estado: 'ACTIVO', cantidad: 7 },
+        { estado: 'EN_MORA', cantidad: 3 },
+      ],
       resumen: {
         totalCreditos: 10,
         montoTotalPrestado: 150000,
@@ -67,10 +76,7 @@ describe('Dashboard', () => {
         porcentajeRecupero: 33.33,
         cantidadCreditosActivos: 7,
         cantidadCreditosEnMora: 3,
-        creditosPorEstado: [
-          { estado: 'ACTIVO', cantidad: 7 },
-          { estado: 'EN_MORA', cantidad: 3 },
-        ],
+        creditosPorEstado: [],
       },
     });
 
